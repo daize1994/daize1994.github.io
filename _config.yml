@@ -1,0 +1,39 @@
+# Site settings
+title: ov’s
+email: daveze@foxmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  ov’s blog
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://daize1994@github.io" # the base hostname & protocol for your site
+# rss_url: /pages/feed.xml
+
+# Sidebar filter
+# Choose 'tag' or 'category' as filter in sidebar.
+filter: 'category'
+
+# Social account
+# twitter: /
+weibo: daize836406062
+github: daize1994
+# codepen:  username
+# dribbble: username
+
+# avatar头像及Favicon
+avatar: /assets/img/touxiang.png
+favicon: /assets/img/touxiang.png
+
+# disqus 设置
+disqus:
+  shortname: daveze
+
+# google analytics 设置
+#ga:
+#  id: UA-54767140-1
+#  url: 
+
+# Build settings
+permalink: /:year/:month/:day/:title.html
+markdown: kramdown
+highlighter: rouge
+sass:
+  style: compressed
