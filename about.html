@@ -8,7 +8,7 @@ header-img: "img/about.jpg"
 <!-- Language Selector -->
 <select onchange= "onLanChange(this.options[this.options.selectedIndex].value)">
     <option value="0" selected> 中文 Chinese </option>
-    <option value="1"> 英语 English </option>
+    <!--option value="1"> 英语 English </option-->
 </select>
 
 <!-- Chinese Version -->
@@ -16,7 +16,7 @@ header-img: "img/about.jpg"
     <blockquote>
         世界那么大，多尝试看看。
     </blockquote>
-    我，毕业于成都大学，2011级，测控技术与仪器。<p>本科搞得一手电路板，毕业后却误打误撞成为码农的.....“***”，对，那就是测试，看起来不起眼的活。</p>
+    我，毕业于成都大学，2011级，测控技术与仪器。<p>本科搞得半手电路板，毕业后却误打误撞成为码农的.....“***”，对，那就是测试，看起来不起眼的活。</p>
     然，我热爱我的热爱。
 
 <!--
@@ -47,12 +47,12 @@ header-img: "img/about.jpg"
 
 </div>
 
-<!-- Handle Language Change -->
+<!-- Handle Language Change,注销了英语，如果要，请改下面的if -->
 <script type="text/javascript">
     var $zh = document.querySelector(".zh");
     var $en = document.querySelector(".en");
     function onLanChange(index){
-        if(index == 0){
+        if(index == 0|index==1){
             $zh.style.display = "block";
             $en.style.display = "none";
         }else{
