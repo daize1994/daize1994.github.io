@@ -1,0 +1,141 @@
+---
+layout:     post
+title:      "接口测试之上传文件"
+subtitle:   " \"使用robotframework框架，自定义系统关键字，实现接口上传文件\""
+date:       2016-05-01 18:00:00
+author:     "daveze"
+header-img: "img/post-bg-2016.jpg"
+tags:
+    - Robot Framework
+    - 接口测试
+---
+
+
+## 背景：
+
+在接口测试或者web UI自动化测试时，常会遇到需要上传文件的场景，此时在UI自动化测试过程中大多会采用AutoIt及其衍生的库来完成，但是这是一种操作windows窗口的方式，适用性不广（无法在没有GUI界面的机器上实现），稳定性也差（或许换一个尺寸或分辨率就gg了）；所以这里建议通过接口上传文件。
+
+
+
+## 目的：
+
+通过接口上传文件
+
+
+
+## 摸索：
+
+通过抓包发现，在web页面上上传一个文件，其实是对某接口地址Post一个请求，如图：
+<img class="shadow" src="/img/in-post/接口测试/请求头信息.png" />
+
+
+上图中是该请求的头信息（若太小请右键点击查看图像）
+
+- 可以看到该接口地址和路径，形如：http://192.169.100.210/web/applicaton/*****；
+
+- 这里面附带了本次上传操作必要的鉴权信息，例如cookies、token等；
+
+- 值得注意的是，请求头中Content-Type是：multipart/form-data，代表我这次请求是要上传文件。
+
+
+
+<img class="shadow" src="/img/in-post/接口测试/post内容信息.png" />
+上图中是该post请求具体的内容：
+
+- 这里的信息会根据不同的产品和不同的接口都有差异，在这个例子中，有2段信息，分别是：name="id"，值为110，代表上传文件对应的id号(该id号在数据库中会有其具体的意义)，和name="file"，值为待上传文件的内容或其二进制信息，代表需要上传的文件和其在服务器上存储的字段名。
+
+- 这2段信息用boundary参数来分隔，就是上面的“-----------------------------4459795128597301541214721262”，随机生成的。
+
+- 还有需要注意的是：post内容里面文件的content-type，我这里上传的是文本，所以为text/plain，如果是apk，则为application/octet-stream，其它文件可以通过抓包来观察。
+
+
+
+## 实现：
+
+- 摸索几遍之后，发现只要我们使用content-type=multipart/form-data请求并附上鉴权信息，再捎带必要的post信息和文件；
+
+- 因为用的RF框架，使用RF中的RequestsLibrary，发现该库中的post关键字可以满足post文本信息的需求，但是满足post文件需求有点困难，感觉限制太大，干脆放弃，所以使用python自己写一个定制的方法吧。
+
+- python中还是使用python的requests库，发现该库中已有的post方法可以直接满足需求，然后我再包装一下，如下：
+
+```
+
+
+def postFile(
+        self,
+        url,
+        headers=None,
+        cookies=None,
+        body_data=None,
+        filepath=None,
+        name=None,
+        filename=None,
+        contentType=None):
+    """使用Content-Type为'multipart/form-data'上传文件
+    :param url:接口地址,含路径
+    :param headers:headers
+    :param cookies:cookies
+    :param body_data:跟随请求发送的参数,字典形式
+    :param filepath:待上传的文件路径
+    :param name:文件的key
+    :param filename:文件名称
+    :param contentType:该文件的内容类型
+    :return:
+    """
+
+    files = {name:(filename, open(filepath, 'rb'), contentType)}
+    request_data = body_data
+
+    r = requests.post(url,cookies=cookies, headers=headers, data=request_data, files=files)
+    status_code=r.status_code
+    reponse=r.json()
+    #headers=r.request.headers
+
+    return status_code,reponse
+```
+
+在RF中调用如下：
+
+```
+
+
+*** Settings ***
+
+Library           RequestsLibrary
+
+Library           Collections
+
+Library           XML
+
+Library           OperatingSystem
+
+Library           Selenium2Library
+
+Library           ${CURDIR}/../ArtisanCustomLibrary
+
+
+
+*** Test Cases ***
+
+upload_mapping
+
+    ${data}    Create Dictionary    id=110
+
+    ${cookies}    Create Dictionary    csrftoken=cursaAAPMeNsEnEGg9BhfrSbxtu16nna    sessionid=38bh6069nfwk8283r81h0j2yvwk1knwk
+
+    ${headers}    Create Dictionary    Token=4debb41d64a043d8a887199943095ead    Connection=keep-alive    User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:44.0) Gecko/20100101 Firefox/44.0
+
+    ${response}    post file    http://test-artisan.testbird.com:9527/webapi/application/version_mapping_file_upload/    ${headers}    ${cookies}    ${data}    /Users/OV/work/Crash-Analysis/test_crash_app/crash_app_sp5_20160222/map.txt
+
+    ...    file    ov_test.txt    text/plain
+
+    log     ${response[0]}
+
+```
+
+## 效果：
+
+如上通过自定义一个方法postFile并导入RF中作为RF系统关键字的方式，实现了通过接口上传txt文件的目的。
+
+
+    

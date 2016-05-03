@@ -3,7 +3,7 @@ title: Daveze Blog
 SEOTitle: OV | Daveze Blog
 header-img: img/home-page.jpg
 email: daveze@foxmail.com
-description: "Wlecome"
+description: "Wlecome,这里会不定期更新些个人学习记录和心得，请多多点评"
 keyword: ""
 url: "http://daize1994.github.io"              # your host, for absolute URL
 baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
@@ -82,8 +82,8 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 # Friends Links
 friends: [
     {
-        title: "OV Blog",
-        href: "http://daize1994.github.io"
+        title: "ME",
+        href: "http://daveze.cc"
     },{
         #title: "Foo",
         href: "#"
