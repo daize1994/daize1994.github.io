@@ -106,7 +106,7 @@ class My_PostRqruestLibrary(MyCustomLibrary):    # 新建个类“My_PostRqruest
 
 
 7.文件夹内容为：
-<img class="shadow" src="/img/in-post/RF/rf开发系统关键字-目录内容.png" />
+<img class="shadow" src="/img/in-post/RF/robotframework开发系统关键字/rf开发系统关键字-目录内容.png" />
 
 8.这并不是唯一的，也不是必须的方式，只是一个相对规范的自定义关键字库，实际请按需选择。
 
