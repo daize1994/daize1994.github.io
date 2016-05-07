@@ -99,7 +99,7 @@ class My_PostRqruestLibrary(MyCustomLibrary):    # 新建个类“My_PostRqruest
 - __init__文件请存在最外层文件夹目录
 
 
-5.完毕，将这个文件夹整体复制到***/Lib/site-packages文件夹或者在导入库时直接使用库路径（推荐后者）
+5.完毕，将这个文件夹整体复制到***/lib/site-packages文件夹或者在导入库时直接使用库路径（推荐前者，以避免多个工程使用一个库需要多处更新的麻烦）
 
 
 6.现在就可以像导入正常的Library一样导入自己写的库
