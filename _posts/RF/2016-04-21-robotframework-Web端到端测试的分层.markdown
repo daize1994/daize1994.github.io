@@ -1,7 +1,7 @@
 ---
 layout:     post
-title:      "robotframework分层测试"
-subtitle:   " \"robotframework分层测试思路\""
+title:      "robotframework-端到端测试的分层"
+subtitle:   " \"robotframework在进行端到端测试时，进行用例分层的思路\""
 date:       2016-04-21 12:00:00
 author:     "daveze"
 header-img: "img/post-bg-2016.jpg"
