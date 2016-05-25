@@ -1,0 +1,87 @@
+---
+layout:     post
+title:      "Selenium智能等待元素"
+subtitle:   " \"提高selenium测试脚本稳定性\""
+date:       2016-05-24 19:00:00
+author:     "daveze"
+header-img: "img/post-bg-2016.jpg"
+tags:
+    - Robot Framework
+    - Selenium
+---
+
+## 背景：
+- 测试过程中，由于网络或页面原因，页面的加载并不如预期及时，或在测试ajax异步加载的页面时，当前窗口并不会全部刷新而是部分内容刷新，此时selenium会在上一步操作后立即去寻找下一步的元素(如果没有设置sleep的话)，若selenium直接去操作element并执行动作，往往出现元素还未加载出来的情况，导致脚本报错，自动化用例“被迫”失败；
+- 此时有种简便的方法是在每一步操作前加上一个sleep时间，可以一定程度上避免此类情况，但是sleep这种“死等”的方式并不完美，容易使线程挂掉，效率也并不是最高。
+- 所以，建议在用例中加上“更智能的等待”
+
+## 实现目标：
+每一步操作前，会直到这一步的元素出现或页面加载完成再执行，这个等待的时间是由程序智能决定的，如果元素出现的早，就立即执行，如果出现的晚，就等它出来再执行，然后，会设定一个超时时间，如果一直没出现，将跳过或置为失败。
+
+## 实现过程：
+**Tips：**
+
+- 显式等待：每次调用它一次才会起一次作用，是对具体某一个元素进行等待，等待元素出现就继续，否则失败。可理解为sleep()死等的智能版。
+- 隐式等待：为浏览器对象设置的一个等待时间，只需调用一次，作用于一个sssion全局(隐蔽式地作用于每一个元素的等待设定)，该方式会对每一个元素都进行等待，等待元素出现就继续，否则等到超时时间才继续。可理解为显式等待的加强版。
+
+**1.1. python：**
+
+- 使用隐式等待`implicitly_wait(time)`API：隐式等待是webdriver类的一个方法，与最大化窗口这些方法一样，在一个session内有效，作用于全局，一次设定即可；这个方法一直在webdriver对象的方法中生效，默认是0，意味着是默认不会停留时间去等元素，如果设置了该方法的值（time），则在time时间内每500ms轮询次页面所有元素以匹配当前driver的find_element方法中的元素，直到目标元素被找到，例如：
+
+```
+driver.implicitly_wait(10)
+```
+
+- 使用WebDriverWait类中的显式等待方法：在规定时间内找到了指定元素，就返回元素值跳出等待，否则将等到超时时间后抛出异常，例子：
+
+```
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+browser = webdriver.Firefox()
+wait = WebDriverWait(browser,10)
+element = wait.until(EC.presence_of_element_located((By.XPATH,"html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/a[1]/i"))) #等待该xpath元素最多10s，找到则返回元素，否则抛异常
+element.click() #点击元素
+```
+
+- 自我实现（显式等待）：
+在一个固定周期的循环内捕获目标元素的NoSuchElementException异常，如果没有异常抛出，说明元素已经出现，则跳出循环继续下一步，如果被捕获到，说明元素没出现，则继续再循环，直到时间超时。例如：
+
+```
+while counts:
+    try:
+        driver.find_element_by_xpath("html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/a[1]/i")
+        break
+    except NoSuchElementException,e:
+        print "元素没出现,继续循环"
+        coutns-=1
+```
+
+counts可以用时间来表示，不过需要计算一个循环的时间，然后依次减去这个时间。
+
+**1.2. Robot Framework：**
+
+- RF提供了`Wait Until Element Is Enabled`显式等待关键字，提供要等待的元素和超时时间，在超时时间之内程序会一直去查找该元素，直到该元素出现就不等了，如果在设定时间内一直没出现，该关键字将failed，例如：
+
+```
+Wait Until Element Is Enabled    xpath=html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/a[1]/i    10
+Click Element    xpath=html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/a[1]/i
+```
+类似的关键字还有：
+<img class="showdom" src="/img/in-post/selenium/selenium智能等待元素/selenium智能等待元素-RF显示等待关键字.png">
+
+- 使用隐式等待关键字`Set Selenium Implicit Wait`，该关键字作用于一个session全局，因此只用设置一次，它可以在设定时间内循环执行driver操作元素的方法，直到操作成功或超过设定的超时时间；例如：
+
+```
+Set Selenium Implicit Wait	20 seconds
+Click Element	link=崩溃分析
+Click Element	xpath=html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/a[1]/i
+```
+
+但是该关键字有个缺陷：在使用其它关键字找出某元素的列表时，这个关键字会使得这类操作必须等待全部的超时时间。
+
+**1.3. Java：**
+
+待补充...
