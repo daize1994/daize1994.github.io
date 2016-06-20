@@ -1,6 +1,6 @@
 # Site settings
-title: Daveze Blog
-SEOTitle: OV | Daveze Blog
+title: Daveze's
+SEOTitle: Daveze 
 header-img: img/home-page.jpg
 email: daveze@foxmail.com
 description: "Wlecome,这里会不定期更新些个人学习记录和心得，请多多点评"
@@ -85,8 +85,8 @@ friends: [
         title: "ME",
         href: "http://daveze.cc"
     },{
-        #title: "Foo",
-        href: "#"
+        title: "Muyoo",
+        href: "http://www.xmuyoo.com"
     },{
         #title: "Bar",
         href: "#"
