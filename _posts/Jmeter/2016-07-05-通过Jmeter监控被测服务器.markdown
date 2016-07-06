@@ -56,8 +56,11 @@ jmeter.save.saveservice.thread_counts=true
 <img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例2.png">
 
 - 监控服务器cup/memory/io/硬盘：选择 jp@gc - PerfMon Metrics Collector
-（注意下面IP为被监控服务器的IP，也就是Agent所在IP；端口为服务器启动Agent时指定的端口，默认为4444）
 <img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/监控cpu等示例.png">
+
+ - 注意上面IP为被监控服务器的IP，也就是Agent所在IP；端口为服务器启动Agent时指定的端口，默认为4444
+ - 如上可添加各项监控指标(cpu等等)，每项指标都有单独的配置项(Metric parameter)，例如可以设置内存显示为已用内存或剩余内存等。
+ - (可选)jmeter plugin参数设置，修改bin/jmeter.properties 文件，参数设置见[原文](http://jmeter-plugins.org/wiki/PerfMon/)
 
 6.OK，开测，试一下效果如何。
 
