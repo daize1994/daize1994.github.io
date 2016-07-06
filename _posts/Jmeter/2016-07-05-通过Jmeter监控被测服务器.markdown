@@ -1,0 +1,64 @@
+---
+layout:     post
+title:      "通过Jmeter监控被测服务器"
+subtitle:   " \"Jmeter监控被测服务器的CPU、Memeroy等资源\""
+date:       2016-07-05 13:30:00
+author:     "daveze"
+header-img: "img/post-bg-2016.jpg"
+tags:
+    - Jmeter
+---
+
+1.下载JMeterPlugins插件，分两部分：
+
+- ServerAgent-2.2.1.zip （服务器监听插件） [[下载地址]](http://www.jmeter-plugins.org/wiki/PerfMonAgent/#Download)
+
+- JMeterPlugins-Standard-1.3.0.zip（本地jmeter插件部分）[[下载地址]](http://jmeter-plugins.org/downloads/all/)
+
+2.解压JMeterPlugins-Standard-1.3.0.zip中lib/ext文件夹的内容到本地jmeter相应目录：E:\apache-jmeter-2.13\lib\ext 
+<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/JMeterPlugins-Standard目录.png">
+解压 ServerAgent-2.2.1.zip到监控服务器任意目录下，如：/opt/apache-jmeter-2.9/ServerAgent-2.2.1
+
+- 运行以启动服务：`sh startAgent.sh`，需要java环境（windows机器执行bat文件即可）
+
+运行成功结果为：
+
+```
+[root@vm-10-154-156-238 ServerAgent-2.2.1]# ls
+CMDRunner.jar  lib  LICENSE  ServerAgent.jar  startAgent.bat  startAgent.sh
+[root@vm-10-154-156-238 ServerAgent-2.2.1]# sh startAgent.sh
+INFO    2016-07-05 23:47:50.438 [kg.apc.p] (): Agent will shutdown when all clients disconnected
+INFO    2016-07-05 23:47:50.488 [kg.apc.p] (): Binding UDP to 4444
+INFO    2016-07-05 23:47:50.504 [kg.apc.p] (): Binding TCP to 4444
+INFO    2016-07-05 23:47:50.507 [kg.apc.p] (): JP@GC Agent v2.2.0 started
+```
+
+- 启动Agent默认的TCP和UDP端口为4444，如果端口被占用，jmeter客户端在请求Agent数据时可能会报“IOException”之类的错误，此时可自定义端口启动：
+`sh startAgent.sh --tcp-port 4443 --udp-port 4442`
+
+- Agent启动后，若要停止它，需要手动关闭该进程，但是可以设置在jmeter客户端使用完毕后自动关闭，如下：
+`sh startAgent.sh --auto-shutdown`
+
+- 可使用`--sysinfo`参数，查看更多启动信息
+
+3.修改本地jmeter安装路径中：bin/jmeter.properties 文件：（JmeterPlugins和Thread有关系所以要修改配置文件）
+
+```
+jmeter.save.saveservice.thread_counts=true 
+```
+
+4.启动JMeter,在线程组或请求中添加监听器就可以看到多了些jp@gc开头的选项，意味着本地监听插件安装成功了；如果报错，请排除插件版本原因。
+
+5.在jmeter中添加各种监听器：
+
+- 添加路径：线程组 -> 添加 -> 监控 
+<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例1.png">
+<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例2.png">
+
+- 监控服务器cup/memory/io/硬盘：选择 jp@gc - PerfMon Metrics Collector
+（注意下面IP为被监控服务器的IP，也就是Agent所在IP；端口为服务器启动Agent时指定的端口，默认为4444）
+<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/监控cpu等示例.png">
+
+6.OK，开测，试一下效果如何。
+
+*部分内容来自网络整理*
