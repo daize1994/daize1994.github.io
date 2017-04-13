@@ -17,7 +17,7 @@ tags:
 
 - “持续”意味着这个过程期望开发能够尽早、尽频地提交以触发整个CI过程，尽量把bug“扼杀”在摇篮里。
 
-<img class="shadow" src="/img/in-post/conclusion/持续集成/jenkins调度各个job.png">
+<img class="shadow" src="/images/in-post/conclusion/持续集成/jenkins调度各个job.png">
 
 
 ## 持续集成的意义：
@@ -30,7 +30,7 @@ tags:
 
 - 当然，于测试而言，可以在一定程度上解放双手，节约时间成本，花时间去做需要我们思考的的东西。
 
-<img class="shadow" src="/img/in-post/conclusion/持续集成/一个测试job.png">
+<img class="shadow" src="/images/in-post/conclusion/持续集成/一个测试job.png">
 
 
 

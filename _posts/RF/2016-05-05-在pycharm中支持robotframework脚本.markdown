@@ -31,21 +31,21 @@ tags:
 
 1.打开Pyhcarm，打开菜单栏>Perferences>打开Plugins>点击Browse reponsitories：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图1.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图1.png" >
 
 2.输入IntelliBot，搜索并安装：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图2.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图2.png" >
 
 3.安装后，重启pycharm，打开任意.robot格式的脚本，正常应该可以识别了：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图3.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图3.png" >
 
 4.但是会发现，第一次安装，并不支持.txt格式的脚本文件，此时需要这么做：
 
  4.1.打开Perferences>Editor>File Types>找到Robot Feature>在Registered Patterns中添加.txt
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图4.1.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/安装插件-图4.1.png" >
 
  4.2.保存即可。
 
@@ -59,12 +59,12 @@ tags:
 
  2.1.配置选择执行单个case：打开Perferences，在Tools中选择External Tools，点击+号新建，按如下信息配置：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图1.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图1.png" >
 其原理就是执行一个pybot命令，只不过这个命令执行的内容是按照我们鼠标的选择来动态变化的。
 
  2.2.配置执行testsuite：方法一样，新建一个Tools，配置内容如下：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图2.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图2.png" >
 
  2.3.配置指令所选Tag，也是和步骤1一样的，只不过把-t换成-i即可。
 
@@ -72,10 +72,10 @@ tags:
 
  3.1.如下图，选择一个用例执行：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图1.1.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图1.1.png" >
 
  3.2.在testsuite内空白位置或选择该testsuite文件右键执行，即可执行该测试套件：
 
-<img class="shadow" src="/img/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图1.2.png" >
+<img class="shadow" src="/images/in-post/RF/在pycharm中支持robotframework脚本/执行测试-图1.2.png" >
 
 ## 完毕！

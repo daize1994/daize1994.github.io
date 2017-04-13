@@ -70,7 +70,7 @@ Wait Until Element Is Enabled    xpath=html/body/div[1]/div/div[2]/div[1]/div[1]
 Click Element    xpath=html/body/div[1]/div/div[2]/div[1]/div[1]/div[2]/a[1]/i
 ```
 类似的关键字还有：
-<img class="showdom" src="/img/in-post/selenium/selenium智能等待元素/selenium智能等待元素-RF显示等待关键字.png">
+<img class="showdom" src="/images/in-post/selenium/selenium智能等待元素/selenium智能等待元素-RF显示等待关键字.png">
 
 - 使用隐式等待关键字`Set Selenium Implicit Wait`，该关键字作用于一个session全局，因此只用设置一次，它可以在设定时间内循环执行driver操作元素的方法，直到操作成功或超过设定的超时时间；例如：
 

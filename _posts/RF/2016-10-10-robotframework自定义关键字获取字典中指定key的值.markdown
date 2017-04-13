@@ -55,7 +55,7 @@ def getValueFromDictByKey(self, dictionary, key):
     return self.value if self.value else [0]
 ```
 
-### 使用：
+## 使用：
 先把上面的代码封装成系统关键字(如有不懂，参考<a href="/2016/04/21/robotframework%E5%BC%80%E5%8F%91%E7%B3%BB%E7%BB%9F%E5%85%B3%E9%94%AE%E5%AD%97/">这里</a>)，然后在RF代码中调用即可，调用示例：
 
 ```

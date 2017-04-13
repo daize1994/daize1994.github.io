@@ -26,7 +26,7 @@ tags:
 ## 摸索：
 
 通过抓包发现，在web页面上上传一个文件，其实是对某接口地址Post一个请求，如图：
-<img class="shadow" src="/img/in-post/接口测试/接口测试之上传文件/请求头信息.png" />
+<img class="shadow" src="/images/in-post/接口测试/接口测试之上传文件/请求头信息.png" />
 
 
 上图中是该请求的头信息（若太小请右键点击查看图像）
@@ -39,7 +39,7 @@ tags:
 
 
 
-<img class="shadow" src="/img/in-post/接口测试/接口测试之上传文件/post内容信息.png" />
+<img class="shadow" src="/images/in-post/接口测试/接口测试之上传文件/post内容信息.png" />
 上图中是该post请求具体的内容：
 
 - 这里的信息会根据不同的产品和不同的接口都有差异，在这个例子中，有2段信息，分别是：name="id"，值为110，代表上传文件对应的id号(该id号在数据库中会有其具体的意义)，和name="file"，值为待上传文件的内容或其二进制信息，代表需要上传的文件和其在服务器上存储的字段名。

@@ -16,7 +16,7 @@ tags:
 - JMeterPlugins-Standard-1.3.0.zip（本地jmeter插件部分）[[下载地址]](http://jmeter-plugins.org/downloads/all/)
 
 2.解压JMeterPlugins-Standard-1.3.0.zip中lib/ext文件夹的内容到本地jmeter相应目录：E:\apache-jmeter-2.13\lib\ext 
-<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/JMeterPlugins-Standard目录.png">
+<img class="png"  src="/images/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/JMeterPlugins-Standard目录.png">
 解压 ServerAgent-2.2.1.zip到监控服务器任意目录下，如：/opt/apache-jmeter-2.9/ServerAgent-2.2.1
 
 - 运行以启动服务：`sh startAgent.sh`，需要java环境（windows机器执行bat文件即可）
@@ -52,11 +52,11 @@ jmeter.save.saveservice.thread_counts=true
 5.在jmeter中添加各种监听器：
 
 - 添加路径：线程组 -> 添加 -> 监控 
-<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例1.png">
-<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例2.png">
+<img class="png"  src="/images/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例1.png">
+<img class="png"  src="/images/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/插件示例2.png">
 
 - 监控服务器cup/memory/io/硬盘：选择 jp@gc - PerfMon Metrics Collector
-<img class="png"  src="/img/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/监控cpu等示例.png">
+<img class="png"  src="/images/in-post/Jmeter/2016-07-05-通过Jmeter监控被测服务器/监控cpu等示例.png">
 
  - 注意上面IP为被监控服务器的IP，也就是Agent所在IP；端口为服务器启动Agent时指定的端口，默认为4444
  - 如上可添加各项监控指标(cpu等等)，每项指标都有单独的配置项(Metric parameter)，例如可以设置内存显示为已用内存或剩余内存等。

@@ -194,7 +194,7 @@ ${crash_json}    Get file    E:\\Crash-Analysis\\crash_report\\android_crash.jso
 - 获取当前的路径：
 使用${CURDIR}变量，例如：
 
-<img class="shadow" src="/img/in-post/RF/robot framework使用笔记/RF的内建变量.png">
+<img class="shadow" src="/images/in-post/RF/robot framework使用笔记/RF的内建变量.png">
 
 ## 9.打印调试信息
 可以使用“Log”关键字，其后可以是任意想打印的信息
