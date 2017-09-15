@@ -1,0 +1,183 @@
+---
+layout:     post
+title:      "Django聚合数据"
+subtitle:   ""
+date:       2017-04-01 14:30:00
+author:     "daveze"
+header-img: "img/post-bg-2016.jpg"
+tags:
+    - Django
+---
+
+## 背景：
+有些时候，光靠数据库中已有字段的数据，还不足以满足一些特殊场景的需求，例如显示一个作者的所有书籍数量。
+这时候就需要在已有数据基础上，聚合出这些没有的数据。
+
+## 为查询集生产聚合：
+Django 提供两种方式生成聚合。第一种方式是对一整个 QuerySet 进行汇总。例如，你想知道上架书籍的平均价格。Django 的查询语法提供了一种得到所有图书的方法：
+```
+Book.objects.all()
+```
+
+在此基础上，我们需要有一个方法来对属于 QuerySet 的对象值进行计算汇总。只要在 QuerySet 上使用 aggregate() 从句即可：
+```
+from django.db.models import Avg
+Book.objects.all().aggregate(Avg('price'))
+>>{'price__avg': 34.35}
+```
+例中的 all() 可以省略，所以能简化为：
+```
+Book.objects.aggregate(Avg('price'))
+>>{'price__avg': 34.35}
+```
+aggregate() 从句的参数反映了我们想计算的聚合值，在这个例子就是，我们要算的就是 Book model 中 price 字段的平均值。可用的聚合函式在 [查询集参考(QuerySet reference) ](http://sns.hwcrazy.com/django/ref/models/querysets/index.html#aggregation-functions)中有详细的列表介绍。
+对 QuerySet 而言，aggregate() 是一个结尾从句（意味着使用它后不能再使用其它queryset方法），它会返回一个键值对字典，其中键名是聚合的标识，键值是计算得出的结果，键名是根据聚合字段的名称和聚合函式的名称得到的。
+如果你想手动指定聚合名称，你可以在指定聚合从句时提供聚合名称：
+```
+Book.objects.aggregate(average_price=Avg('price'))
+>>{'average_price': 34.35}
+```
+如果你想生成不止一个聚合，你只要在 aggregate() 从句中添加另一个聚合即可，所以，如果我们还想知道所有书籍的最高价和最低价，可以这样写：
+```
+from django.db.models import Avg, Max, Min, Count
+Book.objects.aggregate(Avg('price'), Max('price'), Min('price'))
+>>{'price__avg': 34.35, 'price__max': Decimal('81.20'), 'price__min': Decimal('12.99')}
+```
+
+## 对查询集中的每一项都生成聚合
+第一种方式是为查询集的所有项求聚合，第二种就是对查询集合的每一项都做聚合，比如，你想知道每本书有多少个作者，书与作者之间是多对多关系，我们得出 QuerySet 中每本书有多少个关联即可。
+1.对每个对象生成汇总是通过 annotate() 从句实现的，在指定 annotate() 从句时， QuerySet 中的每个对象都根据所指定的值得到注解，注解语法与使用 aggregate() 从句的语法是相同的，annotate() 中的每个参数都代表一个要计算的聚合。例如，将作者的数量作为图书的注解：
+```
+# Build an annotated queryset
+>>> q = Book.objects.annotate(Count('authors'))
+# Interrogate the first object in the queryset
+>>> q[0]
+<Book: The Definitive Guide to Django>
+>>> q[0].authors__count
+2
+# Interrogate the second object in the queryset
+>>> q[1]
+<Book: Practical Django Projects>
+>>> q[1].authors__count
+1
+```
+2.和使用 aggregate() 一样，注解的名称也根据聚合函式的名称和聚合字段的名称得到的。你可以在指定注解时，为默认名称提供一个别名：
+```
+>>> q = Book.objects.annotate(num_authors=Count('authors'))
+>>> q[0].num_authors
+2
+>>> q[1].num_authors
+1
+```
+与 aggregate() 不同的是， annotate() 不是一个结尾从句。 annotate() 从句的返回结果是一个查询集 QuerySet，这个查询集 QuerySet 可以用任何 QuerySet 方法进行修改，包括 filter()， order_by, 甚至是再次应用 annotate()。
+
+3.annotate()同时支持关联数据的聚合，我们可以用双下划线去表示关联关系，django会得到关联数据的聚合。
+例如，要得到每个书店的价格区别，可以如下这般使用注解：
+```
+>>> Store.objects.annotate(min_price=Min('books__price'), max_price=Max('books__price'))
+```
+这段代码告诉 Django 获取书店(Store) model，关联(通过多对多关系)的图书(Book) model，然后对每本书的价格进行聚合，得出最小值和最大值。
+同样的规则也用于 aggregate() 从句。如果你想知道所有书店中最便宜的书和最贵的书价格分别是多少：
+```
+>>> Store.objects.aggregate(min_price=Min('books__price'), max_price=Max('books__price'))
+```
+关系链可以按你的要求一直延伸。例如，想得到所有作者当中最小的年龄是多少，就可以这样写：
+```
+>>> Store.objects.aggregate(youngest_age=Min('books__authors__age'))
+```
+## 聚合和其他查询集从句
+
+1.filter() and exclude():
+
+聚合也可以在过滤器中使用。作用于普通 model 字段的任何 filter() (或 exclude()) 都会对聚合涉及的对象进行限制。
+使用 annotate() 从句时，过滤器有限制注解对象的作用。例如，你想得到以 "Django" 为书名开头的图书作者的总数：
+```
+>>> Book.objects.filter(name__startswith="Django").annotate(num_authors=Count('authors'))
+```
+使用 aggregate() 从句时，过滤器有限制聚合对象的作用。例如，你可以算出所有以 "Django" 为书名开头的图书平均价格：
+```
+>>> Book.objects.filter(name__startswith="Django").aggregate(Avg('price'))
+```
+2.对注解过滤(Filtering on annotations):
+
+注解值也可以被过滤。象使用其他 model 字段一样，注解也可以在 filter() 和 exclude() 从句中使用别名。
+例如，要得到不止一个作者的图书，可以用：
+```
+>>> Book.objects.annotate(num_authors=Count('authors')).filter(num_authors__gt=1)
+```
+这个查询先生成一个注解结果，然后再生成一个作用于注解上的过滤器。
+3.annotate() 和 filter() 从句的顺序:
+
+编写一个包含 annotate() 和 filter() 从句的复杂查询时，要特别注意作用于 QuerySet 的从句的顺序。
+当一个 annotate() 从句作用于某个查询时，要根据查询的状态才能得出注解值，而状态由 annotate() 位置所决定。所以这就导致 filter() 和 annotate() 不能交换顺序，下面两个查询就是不同的：
+```
+>>> Publisher.objects.annotate(num_books=Count('book')).filter(book__rating__gt=3.0)
+```
+另一个查询：
+```
+>>> Publisher.objects.filter(book__rating__gt=3.0).annotate(num_books=Count('book'))
+```
+两个查询都返回了至少出版了一本好书(评分大于 3 分)的出版商。但是第一个查询的注解包含其该出版商发行的所有图书的总数；而第二个查询的注解只包含出版过好书的出版商的所发行的图书总数。在第一个查询中，注解在过滤器之前，所以过滤器对注解没有影响。在第二个查询中，过滤器在注解之前，所以，在计算注解值时，过滤器就限制了参与运算的对象的范围。
+4.order_by():
+
+注解可以用来做为排序项。在你定义 order_by() 从句时，你提供的聚合可以引用定义的任何别名做为查询中 annotate() 从句的一部分。
+例如，根据一本图书作者数量的多少对查询集 QuerySet 进行排序：
+```
+>>> Book.objects.annotate(num_authors=Count('authors')).order_by('num_authors')
+```
+5.values():
+
+通常，注解是添加到每一个对象上的，一个执行了注解操作的查询集 QuerySet 所返回的结果中，每个对象都添加了一个注解值。但是，如果使用了 values() 从句，它就会限制结果中列的范围，对注解赋值的方法就会完全不同。就不是在原始的 QuerySet 返回结果中对每个对象中添加注解，而是根据定义在 values() 从句中的字段组合对先结果进行**唯一的分组**(放在vaues中的fields对应的各个值若相同则会归为一组)，再根据每个分组算出注解值，这个注解值是根据分组中所有的成员计算而得的：
+```
+>>> Author.objects.annotate(average_rating=Avg('book__rating'))
+```
+这段代码返回的是数据库中所有的作者以及他们所著图书的平均评分。
+但如果你使用了 values() 从句，结果就就会截然不同：
+```
+>>> Author.objects.values('name').annotate(average_rating=Avg('book__rating'))
+```
+在这个例子中，作者会按名称分组，所以你只能得到某个唯一的作者分组的注解值。这意味着如果你有两个作者同名，那么他们原本各自的查询结果将被合并到同一个结果中；两个作者的所有评分都将被计算为一个平均分。
+6.annotate() 和 values() 从句的顺序:
+
+和使用 filter() 从句一样，作用于某个查询的 annotate() 和 values() 从句的使用顺序是非常重要的。如果 values() 从句在 annotate() 之前，就会根据 values() 从句产生的分组来计算注解。
+但是，如果 annotate() 从句在 values() 从句之前，就会根据整个查询集生成注解。在这种情况下，values() 从句只能限制输出的字段范围。
+举个例子，如果我们互换了上个例子中 values() 和 annotate() 从句的顺序：
+```
+>>> Author.objects.annotate(average_rating=Avg('book__rating')).values('name', 'average_rating')
+```
+这段代码将给每个作者添加一个唯一的字段，但只有作者名称和 average_rating 注解会返回在输出结果中。
+你也应该注意到 average_rating 显式地包含在返回的列表当中。之所以这么做的原因正是因为 values() 和 annotate() 从句。
+如果 values() 从句在 annotate() 从句之前，注解会被自动添加到结果集中；但是，如果 values() 从句作用于 annotate() 从句之后，你需要显式地包含聚合列。
+
+7.与默认排序或order_by()交互(Interaction with default ordering or order_by()):
+
+在查询集中的 order_by() 部分(或是在 model 中默认定义的排序项) 会在选择输出数据时被用到，即使这些字段没有在 values() 调用中被指定。这些额外的字段可以将相似的数据行分在一起，也可以让相同的数据行相分离。在做计数时，就会表现地格外明显：
+经由这个例子来认识一下，假设你有下面这样一个 model：
+```
+class Item(models.Model):
+    name = models.CharField(max_length=10)
+    data = models.IntegerField()
+    class Meta:
+        ordering = ["name"]
+```
+这关键的部分就是在 model 默认排序项中设置的 name 字段。如果你想知道每个非重复的 data 值出现的次数，可以这样写：
+```
+# Warning: not quite correct!
+Item.objects.values("data").annotate(Count("id"))
+```
+...这部分代码想通过使用它们公共的 data 值来分组 Item 对象，然后在每个分组中得到 id 值的总数。但是上面那样做是行不通的。这是因为默认排序项中的 name 也是一个分组项，所以这个查询会根据非重复的 (data, name) 进行分组，而这并不是你本来想要的结果。所以，你应该这样改写：
+```
+Item.objects.values("data").annotate(Count("id")).order_by()
+```
+...这样就清空了查询中的所有排序项。你也可以在其中使用 data ，这样并不会有副作用，这是因为查询分组中只有这么一个角色了。
+这个行为与查询集文档中提到的 distinct() 一样，而且生成规则也一样：一般情况下，你不想在结果中由额外的字段扮演这个角色，那就清空排序项，或是至少保证它仅能访问 values() 中的字段。
+注意
+你可能想知道为什么 Django 不删除与你无关的列？主要原因就是要保证使用 distinct() 和其他方法的一致性。Django 永远不会 删除你所指定的排序限制(我们不能改动那些方法的行为，因为这会违背 API 稳定性 原则)。
+
+## 聚合注解
+你也可以在注解的结果上生成聚合。当你定义一个 aggregate() 从句时，你提供的聚合会引用定义的任何别名做为查询中 annotate() 从句的一部分。
+例如，如果你想计算每本书平均有几个作者，你先用作者总数注解图书集，然后再聚合作者总数，引入注解字段：
+```
+>>> Book.objects.annotate(num_authors=Count('authors')).aggregate(Avg('num_authors'))
+{'num_authors__avg': 1.66}
+```
